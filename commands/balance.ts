@@ -6,7 +6,7 @@ export let execute: CommandHandler = (msg, args) => {
 
 	let { balance } = getUserMonetaryInfo(user.id);
 
-	msg.reply(`usuário ${user.username} tem R$${balance} na conta`);
+	msg.reply(`usuário ${user.username} tem P$${balance} na conta`);
 };
 
 export default execute;

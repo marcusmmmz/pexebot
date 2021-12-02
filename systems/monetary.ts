@@ -22,24 +22,19 @@ usersMonetaryInfo[CENTRAL_BANK_ACCOUNT] = {
 
 // Base functions
 
+function createAccount(userId: string) {
+	return (usersMonetaryInfo[userId] = {
+		balance: 0,
+	});
+}
 export function getUserMonetaryInfo(id: string) {
-	let monetaryInfo = usersMonetaryInfo[id];
-
-	if (monetaryInfo == undefined) {
-		usersMonetaryInfo[id] = {
-			balance: 10,
-		};
-		monetaryInfo = usersMonetaryInfo[id];
-	}
-
-	return monetaryInfo;
+	return usersMonetaryInfo[id] ?? createAccount(id);
 }
 function changeUserBalance(userId: string, balance: number) {
-	usersMonetaryInfo[userId].balance = balance;
+	(usersMonetaryInfo[userId] ?? createAccount(userId)).balance = balance;
 }
 
 // Payments
-
 export function payUser(
 	payerId: string,
 	payeeId: string,
@@ -67,10 +62,6 @@ export function payUser(
 }
 
 // Central bank
-
-export function printMoney(amount: number) {
-	changeUserBalance(CENTRAL_BANK_ACCOUNT, amount);
-}
 export function lendMoney(user: string, amount: number) {
-	payUser(CENTRAL_BANK_ACCOUNT, user, amount);
+	changeUserBalance(user, getUserMonetaryInfo(user).balance + amount);
 }

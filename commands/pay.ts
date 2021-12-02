@@ -22,7 +22,7 @@ export let execute: CommandHandler = (msg, args) => {
 		return msg.reply("unhandled error");
 	}
 
-	msg.reply(`${payer.username} paid ${payee.username} R$${amount}`);
+	msg.reply(`${payer.username} paid ${payee.username} P$${amount}`);
 };
 
 export default execute;
