@@ -1,9 +1,11 @@
 {
 	"name": "pexebot",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "dist/index",
 	"scripts": {
-		"dev": "ts-node-dev index.ts"
+		"dev": "ts-node-dev index.ts",
+		"build": "tsc",
+    	"start": "node ."
 	},
 	"author": "",
 	"license": "ISC",
