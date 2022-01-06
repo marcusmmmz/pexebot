@@ -4,10 +4,9 @@ import balance from "./balance";
 
 import { Awaitable, Message } from "discord.js";
 import { Dict } from "../utils";
+import { prefix } from "../env";
 
 export type CommandHandler = (message: Message, args: string[]) => any;
-
-const prefix = "pexe";
 
 export default function handleMessageCreate(message: Message): Awaitable<void> {
 	if (message.author.bot) return;
