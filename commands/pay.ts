@@ -1,4 +1,4 @@
-import { transactionErrors, payUser } from "../systems/monetary";
+import { payUser, TransactionError } from "../systems/monetary";
 import { CommandHandler } from "./index";
 
 export let execute: CommandHandler = (msg, args) => {
@@ -9,17 +9,23 @@ export let execute: CommandHandler = (msg, args) => {
 	if (!payee?.username)
 		return msg.reply("Menciona pra quem q tu vai dar o dinheiro");
 
-	const { error } = payUser(payer.id, payee.id, amount);
-	if (error !== null) {
-		if (error == transactionErrors.INSUFFICIENT_FUNDS)
-			return msg.reply("Tu não nem tanto dinheiro assim porrar");
-		if (error == transactionErrors.INVALID_AMOUNT)
-			return msg.reply("Tá tentando roubar porrar?");
-		if (error == transactionErrors.SAME_PAYER_AND_PAYEE)
-			return msg.reply(
-				"Você passou o dinheiro da sua mão esquerda para sua mão direita"
-			);
-		return msg.reply("unhandled error");
+	try {
+		payUser(payer.id, payee.id, amount);
+	} catch (err) {
+		if (err instanceof TransactionError) {
+			switch (err.type) {
+				case "INSUFFICIENT_FUNDS":
+					return msg.reply("Tu não tem tanto dinheiro assim porrar");
+				case "INVALID_AMOUNT":
+					return msg.reply("Tá tentando roubar porrar?");
+				case "SAME_PAYER_AND_PAYEE":
+					return msg.reply(
+						"Você passou o dinheiro da sua mão esquerda para sua mão direita"
+					);
+				default:
+					throw err;
+			}
+		} else throw err;
 	}
 
 	msg.reply(`${payer.username} paid ${payee.username} P$${amount}`);
