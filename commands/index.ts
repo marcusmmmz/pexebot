@@ -22,12 +22,7 @@ export default function handleMessageCreate(message: Message): Awaitable<void> {
 		return;
 	}
 
-	try {
-		handler(message, args);
-	} catch (error) {
-		message.reply("Unhandled error");
-		console.log(error);
-	}
+	handler(message, args);
 }
 
 let commands: Dict<CommandHandler> = {

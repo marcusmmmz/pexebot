@@ -4,15 +4,10 @@ export interface IMonetaryInfo {
 	balance: number;
 }
 
-export class TransactionError extends Error {
-	constructor(
-		public type:
-			| "INSUFFICIENT_FUNDS"
-			| "INVALID_AMOUNT"
-			| "SAME_PAYER_AND_PAYEE"
-	) {
-		super(type);
-	}
+export enum transactionErrors {
+	INSUFFICIENT_FUNDS,
+	INVALID_AMOUNT,
+	SAME_PAYER_AND_PAYEE,
 }
 
 export const CENTRAL_BANK_ACCOUNT = "banco central";
@@ -37,14 +32,30 @@ function changeUserBalance(userId: string, balance: number) {
 }
 
 // Payments
-export function payUser(payerId: string, payeeId: string, amount: number) {
+export function payUser(
+	payerId: string,
+	payeeId: string,
+	amount: number
+): { error: transactionErrors | null } {
 	if (getUserMonetaryInfo(payerId).balance < amount)
-		throw new TransactionError("INSUFFICIENT_FUNDS");
-	if (amount !== Math.abs(amount)) throw new TransactionError("INVALID_AMOUNT");
-	if (payerId == payeeId) throw new TransactionError("SAME_PAYER_AND_PAYEE");
+		return {
+			error: transactionErrors.INSUFFICIENT_FUNDS,
+		};
+	if (amount !== Math.abs(amount))
+		return {
+			error: transactionErrors.INVALID_AMOUNT,
+		};
+	if (payerId == payeeId)
+		return {
+			error: transactionErrors.SAME_PAYER_AND_PAYEE,
+		};
 
 	changeUserBalance(payerId, getUserMonetaryInfo(payerId).balance - amount);
 	changeUserBalance(payeeId, getUserMonetaryInfo(payeeId).balance + amount);
+
+	return {
+		error: null,
+	};
 }
 
 // Central bank
