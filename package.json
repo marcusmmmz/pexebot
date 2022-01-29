@@ -3,9 +3,9 @@
 	"version": "1.0.0",
 	"main": "dist/index",
 	"scripts": {
-		"dev": "ts-node-dev index.ts",
+		"dev": "cd ./src && ts-node-dev ./index.ts",
 		"build": "tsc",
-    	"start": "node ."
+		"start": "cd ./dist && node ./index.js"
 	},
 	"author": "",
 	"license": "ISC",
