@@ -3,18 +3,23 @@
 	"version": "1.0.0",
 	"main": "dist/index",
 	"scripts": {
-		"dev": "cd ./src && ts-node-dev ./index.ts",
-		"build": "tsc",
-		"start": "cd ./dist && node ./index.js"
+		"postinstall": "prisma generate",
+		"dev": "prisma generate --watch & (cd ./src && ts-node-dev ./index.ts)",
+		"build": "prisma migrate deploy && tsc",
+		"start": "cd ./dist && node ./index.js",
+		"migrate:dev": "prisma migrate dev",
+		"studio": "prisma studio"
 	},
 	"author": "",
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"@prisma/client": "^3.9.0",
 		"discord.js": "^13.3.1",
 		"dotenv": "^10.0.0"
 	},
 	"devDependencies": {
+		"prisma": "^3.9.0",
 		"ts-node-dev": "^1.1.8",
 		"typescript": "^4.5.2"
 	}
