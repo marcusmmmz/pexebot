@@ -1,6 +1,5 @@
-import { payUser, transactionErrors } from "../systems/monetary";
+import { formatPexes, payUser, transactionErrors } from "../systems/monetary";
 import { Command } from "../commandHandler";
-import { Decimal } from "@prisma/client/runtime";
 
 const command: Command = {
 	aliases: ["pay", "pagar"],
@@ -30,7 +29,9 @@ const command: Command = {
 					return msg.reply("Pera q teve um unhandled error");
 			}
 
-		msg.reply(`${payer.username} paid ${payee.username} P$${amount}`);
+		msg.reply(
+			`${payer.username} paid ${payee.username} ${formatPexes(amount)}`
+		);
 	},
 };
 

@@ -1,5 +1,4 @@
 import type { Prisma } from "@prisma/client";
-import { Decimal } from "@prisma/client/runtime";
 import db from "../db";
 
 export interface IMonetaryInfo {
@@ -11,6 +10,18 @@ export enum transactionErrors {
 	INVALID_AMOUNT,
 	ONLY_INTEGERS_ALLOWED,
 	SAME_PAYER_AND_PAYEE,
+}
+
+// Formatting
+
+export function formatPexes(number: number) {
+	return Intl.NumberFormat("pt-BR", {
+		style: "currency",
+		currency: "BRL",
+		maximumFractionDigits: 0,
+	})
+		.format(number)
+		.replace("R", "P");
 }
 
 // Base functions

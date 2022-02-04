@@ -1,4 +1,4 @@
-import { getUserMonetaryInfo } from "../systems/monetary";
+import { formatPexes, getUserMonetaryInfo } from "../systems/monetary";
 import { Command } from "../commandHandler";
 
 const command: Command = {
@@ -8,7 +8,9 @@ const command: Command = {
 
 		let { balance } = await getUserMonetaryInfo(user.id);
 
-		msg.reply(`O usuário ${user.username} tem P$${balance} na conta`);
+		msg.reply(
+			`O usuário ${user.username} tem ${formatPexes(balance)} na conta`
+		);
 	},
 };
 

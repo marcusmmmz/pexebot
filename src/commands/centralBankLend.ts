@@ -1,4 +1,4 @@
-import { lendMoney } from "../systems/monetary";
+import { formatPexes, lendMoney } from "../systems/monetary";
 import { Command } from "../commandHandler";
 
 let command: Command = {
@@ -16,7 +16,9 @@ let command: Command = {
 		await lendMoney(payee.id, amount);
 
 		return msg.reply(
-			`O banco central emprestou P$${amount} pro usuário ${payee.username} com taxa de juros de 0%`
+			`O banco central emprestou ${formatPexes(amount)} pro usuário ${
+				payee.username
+			} com taxa de juros de 0%`
 		);
 	},
 };
