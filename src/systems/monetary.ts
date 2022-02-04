@@ -61,7 +61,7 @@ export async function payUser(
 		}),
 		db.user.upsert({
 			where: { id: payeeId },
-			create: { id: payerId, balance: amount },
+			create: { id: payeeId, balance: amount },
 			update: { balance: { increment: amount } },
 		}),
 	]);
