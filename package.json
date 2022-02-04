@@ -4,7 +4,7 @@
 	"main": "dist/index",
 	"scripts": {
 		"postinstall": "prisma generate",
-		"dev": "prisma generate --watch & (cd ./src && ts-node-dev ./index.ts)",
+		"dev": "cd ./src && ts-node-dev ./index.ts",
 		"build": "prisma migrate deploy && tsc",
 		"start": "cd ./dist && node ./index.js",
 		"migrate:dev": "prisma migrate dev",

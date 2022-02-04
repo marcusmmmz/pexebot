@@ -1,9 +1,10 @@
 import { payUser, transactionErrors } from "../systems/monetary";
 import { Command } from "../commandHandler";
+import { Decimal } from "@prisma/client/runtime";
 
 const command: Command = {
 	aliases: ["pay", "pagar"],
-	execute({ msg, args }) {
+	async execute({ msg, args }) {
 		let payer = msg.author;
 		let payee = msg.mentions.users.first();
 		let amount = Number(args[args.length - 1]);
@@ -11,7 +12,7 @@ const command: Command = {
 		if (!payee?.username)
 			return msg.reply("Menciona pra quem q tu vai dar o dinheiro");
 
-		const { error } = payUser(payer.id, payee.id, amount);
+		const { error } = await payUser(payer.id, payee.id, amount);
 
 		if (error !== null)
 			switch (error) {
@@ -19,6 +20,8 @@ const command: Command = {
 					return msg.reply("Tu não tem tanto dinheiro assim porrar");
 				case transactionErrors.INVALID_AMOUNT:
 					return msg.reply("Tá tentando roubar porrar?");
+				case transactionErrors.ONLY_INTEGERS_ALLOWED:
+					return msg.reply("Só é permitido transferir valores inteiros");
 				case transactionErrors.SAME_PAYER_AND_PAYEE:
 					return msg.reply(
 						"Você passou o dinheiro da sua mão esquerda para sua mão direita"

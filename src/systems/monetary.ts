@@ -1,4 +1,6 @@
-import { Dict } from "../utils";
+import type { Prisma } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime";
+import db from "../db";
 
 export interface IMonetaryInfo {
 	balance: number;
@@ -7,51 +9,62 @@ export interface IMonetaryInfo {
 export enum transactionErrors {
 	INSUFFICIENT_FUNDS,
 	INVALID_AMOUNT,
+	ONLY_INTEGERS_ALLOWED,
 	SAME_PAYER_AND_PAYEE,
 }
 
-export const CENTRAL_BANK_ACCOUNT = "banco central";
-
-let usersMonetaryInfo: Dict<IMonetaryInfo> = {};
-usersMonetaryInfo[CENTRAL_BANK_ACCOUNT] = {
-	balance: 0,
-};
-
 // Base functions
 
-function createAccount(userId: string) {
-	return (usersMonetaryInfo[userId] = {
-		balance: 0,
-	});
+async function createAccount(data: Prisma.UserCreateInput) {
+	return await db.user.create({ data });
 }
-export function getUserMonetaryInfo(id: string) {
-	return usersMonetaryInfo[id] ?? createAccount(id);
-}
-function changeUserBalance(userId: string, balance: number) {
-	(usersMonetaryInfo[userId] ?? createAccount(userId)).balance = balance;
+
+export async function getUserMonetaryInfo(id: string) {
+	return (
+		(await db.user.findUnique({
+			where: { id },
+			select: { balance: true },
+		})) ?? (await createAccount({ id }))
+	);
 }
 
 // Payments
-export function payUser(
+export async function payUser(
 	payerId: string,
 	payeeId: string,
 	amount: number
-): { error: transactionErrors | null } {
-	if (getUserMonetaryInfo(payerId).balance < amount)
+): Promise<{ error: transactionErrors | null }> {
+	let { balance } = await getUserMonetaryInfo(payerId);
+
+	if (balance < amount)
 		return {
 			error: transactionErrors.INSUFFICIENT_FUNDS,
 		};
-	if (amount !== Math.abs(amount))
+	if (amount <= 0)
 		return {
 			error: transactionErrors.INVALID_AMOUNT,
+		};
+	if (Math.floor(amount) !== amount)
+		return {
+			error: transactionErrors.ONLY_INTEGERS_ALLOWED,
 		};
 	if (payerId == payeeId)
 		return {
 			error: transactionErrors.SAME_PAYER_AND_PAYEE,
 		};
 
-	changeUserBalance(payerId, getUserMonetaryInfo(payerId).balance - amount);
-	changeUserBalance(payeeId, getUserMonetaryInfo(payeeId).balance + amount);
+	await db.$transaction([
+		db.user.upsert({
+			where: { id: payerId },
+			create: { id: payerId, balance: amount },
+			update: { balance: { decrement: amount } },
+		}),
+		db.user.upsert({
+			where: { id: payeeId },
+			create: { id: payerId, balance: amount },
+			update: { balance: { increment: amount } },
+		}),
+	]);
 
 	return {
 		error: null,
@@ -59,6 +72,10 @@ export function payUser(
 }
 
 // Central bank
-export function lendMoney(user: string, amount: number) {
-	changeUserBalance(user, getUserMonetaryInfo(user).balance + amount);
+export async function lendMoney(id: string, amount: number) {
+	return await db.user.upsert({
+		where: { id },
+		create: { id, balance: amount },
+		update: { balance: { increment: amount } },
+	});
 }
