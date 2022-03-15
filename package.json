@@ -4,7 +4,7 @@
 	"main": "dist/index",
 	"scripts": {
 		"postinstall": "prisma generate",
-		"dev": "cd ./src && ts-node-dev ./index.ts",
+		"dev": "cd ./src && nodemon ./index.ts",
 		"build": "prisma migrate deploy && tsc",
 		"start": "cd ./dist && node ./index.js",
 		"migrate:dev": "prisma migrate dev",
@@ -19,8 +19,9 @@
 		"dotenv": "^10.0.0"
 	},
 	"devDependencies": {
+		"nodemon": "^2.0.15",
 		"prisma": "^3.9.0",
-		"ts-node-dev": "^1.1.8",
+		"ts-node": "^10.7.0",
 		"typescript": "^4.5.2"
 	}
 }

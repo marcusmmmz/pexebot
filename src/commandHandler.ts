@@ -15,6 +15,8 @@ export interface Command {
 	execute: CommandHandler;
 }
 
+const commandsDirPath = "./commands";
+
 export default function handleCommand(msg: Message) {
 	let split = msg.content.slice(prefix.length).split(" ");
 	let commandName = split[0];
@@ -31,24 +33,21 @@ export default function handleCommand(msg: Message) {
 export async function setupCommands() {
 	console.log("Setting up commands");
 
-	// -3 is for removing the ".ts" or ".js" file extension
-	let commandNames = (await readdir("./commands")).map((v) => v.slice(0, -3));
-	let commands = await Promise.all(
-		commandNames.map(
-			async (commandName) =>
-				(
-					await import("./commands/" + commandName)
-				).default as Command
-		)
+	let commandFiles = await readdir(commandsDirPath);
+
+	await Promise.all(
+		commandFiles.map(async (commandName) => {
+			let command: Command = (await import(`${commandsDirPath}/` + commandName))
+				.default;
+
+			if (command.aliases.some((alias) => commandHandlers[alias]))
+				throw new Error(`${commandName} has a conflicting alias.`);
+
+			command.aliases.forEach(
+				(alias) => (commandHandlers[alias] = command.execute)
+			);
+		})
 	);
-	for (const command of commands) {
-		command.aliases.forEach(
-			(alias) => (commandHandlers[alias] = command.execute)
-		);
-		// for (const alias of command.aliases) {
-		// 	commandHandlers[alias] = command.execute;
-		// }
-	}
 
 	console.log("Commands setup done");
 }
