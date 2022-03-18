@@ -1,14 +1,22 @@
 import { Dict } from "../utils";
 
-interface ItemStack {
+export interface ItemStack {
 	itemID: string;
 	amount: number;
+}
+export function ItemStack(itemID: string, amount: number) {
+	return { itemID, amount };
 }
 
 let inventories: Dict<ItemStack[]> = {};
 
 export const formatItemStack = ({ amount, itemID }: ItemStack) =>
 	`${amount} ${itemID}`;
+
+export const formatItemStacks = (itemStacks: ItemStack[]) =>
+	itemStacks.length !== 0
+		? itemStacks.map(formatItemStack).join(", ")
+		: "Nenhum";
 
 export function getInventory(id: string) {
 	return inventories[id] ?? createInventory(id);
@@ -42,7 +50,7 @@ export function removeItemById(stack: ItemStack, user: string) {
 	slot.amount -= stack.amount;
 
 	if (slot.amount == 0) {
-		slots.filter(({ itemID }) => itemID == stack.itemID);
+		inventories[user] = slots.filter(({ itemID }) => itemID !== stack.itemID);
 	}
 }
 
