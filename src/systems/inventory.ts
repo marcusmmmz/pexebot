@@ -1,4 +1,4 @@
-import { Dict } from "../utils";
+import { Dict, makeFail } from "../utils";
 
 export interface ItemStack {
 	itemID: string;
@@ -40,17 +40,25 @@ export function addItem(stack: ItemStack, user: string) {
 	getInventory(user).push(stack);
 }
 
+export enum RemoveItemErrors {
+	USER_DOESNT_HAVE_ITEM,
+	USER_DOESNT_HAVE_ENOUGH_ITEMS,
+}
 export function removeItemById(stack: ItemStack, user: string) {
 	let slots = getInventory(user);
 
 	let slot = slots.find(({ itemID }) => itemID == stack.itemID);
 
-	if (!slot) return;
+	if (!slot) return makeFail(RemoveItemErrors.USER_DOESNT_HAVE_ITEM);
 
 	slot.amount -= stack.amount;
 
 	if (slot.amount == 0) {
 		inventories[user] = slots.filter(({ itemID }) => itemID !== stack.itemID);
+	}
+
+	if (slot.amount < 0) {
+		return makeFail(RemoveItemErrors.USER_DOESNT_HAVE_ENOUGH_ITEMS);
 	}
 }
 

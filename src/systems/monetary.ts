@@ -1,15 +1,9 @@
 import type { Prisma } from "@prisma/client";
 import db from "../db";
+import { makeFail, makeSuccess } from "../utils";
 
 export interface IMonetaryInfo {
 	balance: number;
-}
-
-export enum transactionErrors {
-	INSUFFICIENT_FUNDS,
-	INVALID_AMOUNT,
-	ONLY_INTEGERS_ALLOWED,
-	SAME_PAYER_AND_PAYEE,
 }
 
 // Formatting
@@ -39,30 +33,24 @@ export async function getUserMonetaryInfo(id: string) {
 	);
 }
 
-// Payments
+export enum PaymentErrors {
+	INSUFFICIENT_FUNDS,
+	INVALID_AMOUNT,
+	ONLY_INTEGERS_ALLOWED,
+	SAME_PAYER_AND_PAYEE,
+}
 export async function payUser(
 	payerId: string,
 	payeeId: string,
 	amount: number
-): Promise<{ error: transactionErrors | null }> {
+) {
 	let { balance } = await getUserMonetaryInfo(payerId);
 
-	if (balance < amount)
-		return {
-			error: transactionErrors.INSUFFICIENT_FUNDS,
-		};
-	if (amount <= 0)
-		return {
-			error: transactionErrors.INVALID_AMOUNT,
-		};
+	if (balance < amount) return makeFail(PaymentErrors.INSUFFICIENT_FUNDS);
+	if (amount <= 0) return makeFail(PaymentErrors.INVALID_AMOUNT);
 	if (Math.floor(amount) !== amount)
-		return {
-			error: transactionErrors.ONLY_INTEGERS_ALLOWED,
-		};
-	if (payerId == payeeId)
-		return {
-			error: transactionErrors.SAME_PAYER_AND_PAYEE,
-		};
+		return makeFail(PaymentErrors.ONLY_INTEGERS_ALLOWED);
+	if (payerId == payeeId) return makeFail(PaymentErrors.SAME_PAYER_AND_PAYEE);
 
 	await db.$transaction([
 		db.user.upsert({
@@ -77,9 +65,7 @@ export async function payUser(
 		}),
 	]);
 
-	return {
-		error: null,
-	};
+	return makeSuccess(null);
 }
 
 // Central bank

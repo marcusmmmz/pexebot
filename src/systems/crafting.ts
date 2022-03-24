@@ -35,7 +35,6 @@ export async function listAvailableCraftings(userId: string) {
 export enum CraftErrors {
 	USER_CANT_CRAFT,
 }
-
 export async function craft(userId: string, crafting: Crafting) {
 	if (!(await canUserCraft(userId, crafting)))
 		return makeFail(CraftErrors.USER_CANT_CRAFT);
