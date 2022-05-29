@@ -20,7 +20,7 @@ const commandsDirPath = "./commands";
 export default function handleCommand(msg: Message) {
 	let split = msg.content.slice(prefix.length).split(" ");
 	let commandName = split[0];
-	let handler = commandHandlers[commandName];
+	let handler = commandDict[commandName]?.execute;
 
 	if (!handler) return msg.reply("Invalid command");
 
@@ -40,16 +40,17 @@ export async function setupCommands() {
 			let command: Command = (await import(`${commandsDirPath}/` + commandName))
 				.default;
 
-			if (command.aliases.some((alias) => commandHandlers[alias]))
+			if (command.aliases.some((alias) => commandDict[alias]))
 				throw new Error(`${commandName} has a conflicting alias.`);
 
-			command.aliases.forEach(
-				(alias) => (commandHandlers[alias] = command.execute)
-			);
+			command.aliases.forEach((alias) => (commandDict[alias] = command));
+
+			commandList.push(command);
 		})
 	);
 
 	console.log("Commands setup done");
 }
 
-let commandHandlers: Dict<CommandHandler> = {};
+export let commandDict: Dict<Command> = {};
+export let commandList: Command[] = [];
