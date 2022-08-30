@@ -1,5 +1,3 @@
-export type Dict<T> = { [key: string]: T };
-
 export type Fail<T> = {
 	err: T;
 	res?: never;

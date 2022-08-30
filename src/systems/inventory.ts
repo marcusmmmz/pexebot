@@ -1,4 +1,4 @@
-import { Dict, makeFail } from "../utils";
+import { makeFail } from "../utils";
 
 export interface ItemStack {
 	itemID: string;
@@ -8,7 +8,7 @@ export function ItemStack(itemID: string, amount: number) {
 	return { itemID, amount };
 }
 
-let inventories: Dict<ItemStack[]> = {};
+let inventories = new Map<string, ItemStack[]>();
 
 export const formatItemStack = ({ amount, itemID }: ItemStack) =>
 	`${amount} ${itemID}`;
@@ -19,11 +19,12 @@ export const formatItemStacks = (itemStacks: ItemStack[]) =>
 		: "Nenhum";
 
 export function getInventory(id: string) {
-	return inventories[id] ?? createInventory(id);
+	return inventories.get(id) ?? createInventory(id);
 }
 
 export function createInventory(id: string) {
-	return (inventories[id] = []);
+	inventories.set(id, []);
+	return [];
 }
 
 export function hasItem(itemId: string, amount: number, user: string) {
@@ -54,7 +55,10 @@ export function removeItemById(stack: ItemStack, user: string) {
 	slot.amount -= stack.amount;
 
 	if (slot.amount == 0) {
-		inventories[user] = slots.filter(({ itemID }) => itemID !== stack.itemID);
+		inventories.set(
+			user,
+			slots.filter(({ itemID }) => itemID !== stack.itemID)
+		);
 	}
 
 	if (slot.amount < 0) {

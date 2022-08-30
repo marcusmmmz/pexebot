@@ -1,4 +1,4 @@
-import { Command, commandDict, commandList } from "../commandHandler";
+import { Command, commandMap, commandSet } from "../commandHandler";
 
 const command: Command = {
 	aliases: ["help", "ajuda"],
@@ -6,13 +6,13 @@ const command: Command = {
 		let commandName = args[0];
 
 		if (commandName) {
-			let command = commandDict[commandName];
+			let command = commandMap.get(commandName);
 
 			if (!command) return msg.reply(`Esse comando não existe!`);
 
 			msg.reply(formatCommand(command));
 		} else {
-			msg.reply("comandos: \n" + formatCommands(commandList));
+			msg.reply("comandos: \n" + formatCommands(Array.from(commandSet)));
 		}
 	},
 };
